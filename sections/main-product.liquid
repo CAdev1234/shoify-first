@@ -14,7 +14,6 @@
 
   
               <script>console.log({{ product | json }});</script>
-              <script>console.log({{ product.options_with_values | json }});</script>
 
   {%- style -%}
     .section-{{ section.id }}-padding {
@@ -499,7 +498,7 @@
                               checked
                             {% endif %}
                           >
-                          <label for="{{ section.id }}-{{ option.position }}-{{ forloop.index0 }}">
+                          <label for="{{ section.id }}-{{ option.position }}-{{ forloop.index0 }}" onclick="clickTag('{{ option.name }}', '{{ forloop.index }}', {{ false }})">
                             {{ value }}
                           </label>
                         {%- endfor -%}
@@ -1054,6 +1053,7 @@
     </div>
   </product-modal>
 
+
   {% assign popups = section.blocks | where: "type", "popup" %}
   {%- for block in popups -%}
     <modal-dialog id="PopupModal-{{ block.id }}" class="product-popup-modal" {{ block.shopify_attributes }}>
@@ -1093,6 +1093,9 @@
   {%- endif -%}
 
   <script>
+    window.productObj = {{ product | json }};
+  </script>
+  <script>
     document.addEventListener('DOMContentLoaded', function() {
       function isIE() {
         const ua = window.navigator.userAgent;
@@ -1101,6 +1104,9 @@
 
         return (msie > 0 || trident > 0);
       }
+      
+      clickTag(null, -1, true)
+      
 
       if (!isIE()) return;
       const hiddenInput = document.querySelector('#{{ product_form_id }} input[name="id"]');
@@ -1113,6 +1119,54 @@
         hiddenInput.value = event.currentTarget.value;
       });
     });
+
+    function clickTag(type, idx, isInit) {
+      const sizeInputs = document.querySelectorAll('variant-radios fieldset:nth-of-type(1) input')
+      const colorInputs = document.querySelectorAll('variant-radios fieldset:nth-of-type(2) input')
+      const productForm = document.querySelectorAll('product-form.product-form')[0]
+      const notifyBtn = document.createElement('button')
+      const notifyBtnId = 'notify-available-btn'
+      notifyBtn.id = notifyBtnId
+      notifyBtn.innerHTML = 'Notify me when available'
+      const existingNotifyBtn = document.querySelector(`#${notifyBtnId}`)
+      const groupBySize = window.productObj.variants.reduce((group, item) => {
+        const { option1 } = item;
+        group[option1] = group[option1] ?? [];
+        group[option1].push(item);
+        return group;
+      }, {});
+      const groupByColor = window.productObj.variants.reduce((group, item) => {
+        const { option2 } = item;
+        group[option2] = group[option2] ?? [];
+        group[option2].push(item);
+        return group;
+      }, {});
+      if (existingNotifyBtn) existingNotifyBtn.remove()
+      Object.values(groupBySize).forEach((item, idx) => {
+        if (item.every(ele => !ele.available)) {
+          sizeInputs[idx].setAttribute('disabled', '')
+        }
+      })
+      Object.values(groupByColor).forEach((item, idx) => {
+        if (item.every(ele => !ele.available)) {
+          colorInputs[idx].setAttribute('disabled', '')
+        }
+      })
+      if (!isInit) {
+        if (type === 'Size') {
+          if (sizeInputs[idx-1].getAttribute('disabled') !== null) {
+            productForm.appendChild(notifyBtn)
+          }
+        }else {
+          if (colorInputs[idx-1].getAttribute('disabled') !== null) {
+            productForm.appendChild(notifyBtn)
+          }
+        }
+        
+      }      
+    }
+
+    
   </script>
 
   {%- liquid

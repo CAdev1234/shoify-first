@@ -233,6 +233,39 @@ fieldset.product-form__input .form__label {
   color: rgb(var(--color-background));
 }
 
+.product-form__input input[type='radio']:disabled + label {
+  background-color: transparent;
+  color: rgb(var(--color-foreground));
+}
+
+.product-form__input input[type='radio']:disabled + label:after {
+  position: absolute;
+  content: "";
+  left: 50%;
+  top: 0;
+  bottom: 0;
+  border-left: 2px solid;
+  border-color: #e8e8e1;
+  border-color: var(--colorBorder);
+  transform: rotate(45deg);
+}
+
+product-form button#notify-available-btn {
+  padding: 15px 0px;
+  width: 100%;
+  margin-top: 10px;
+  background: black;
+  color: white;
+  font-size: 15px;
+  border: none;
+  cursor: pointer;
+}
+product-form button#notify-available-btn:hover {
+  opacity: 0.8;
+}
+
+
+
 @media screen and (forced-colors: active) {
   .product-form__input input[type=radio]:checked + label {
     text-decoration: underline;
@@ -246,7 +279,6 @@ fieldset.product-form__input .form__label {
 .product-form__input input[type='radio']:disabled + label {
   border-color: rgba(var(--color-foreground), 0.1);
   color: rgba(var(--color-foreground), 0.4);
-  text-decoration: line-through;
 }
 .product-form__input input[type='radio']:focus-visible + label {
   box-shadow: 0 0 0 0.3rem rgb(var(--color-background)),
